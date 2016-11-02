@@ -1,0 +1,28 @@
+{
+  "name": "mock_dl",
+  "version": "0.1.0",
+  "license": "MIT",
+  "description": "Scaffold",
+  "repository": {
+    "type": "git",
+    "url": "https://www.github.com/billba/mock_dl"
+  },
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "nodewatch": "nodemon index.js",
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "body-parser": "^1.15.2",
+    "dotenv": "^2.0.0",
+    "express": "^4.14.0"
+  },
+  "devDependencies": {
+    "@types/body-parser": "0.0.33",
+    "@types/express": "^4.0.33",
+    "nodemon": "^1.10.2",
+    "typescript": "^2.0.3"
+  }
+}
