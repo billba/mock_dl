@@ -6,21 +6,21 @@
 
 1. Optionally, create a .env file containing defaults 
 
-    PORT = your_favorite_port
+`PORT = your_favorite_port`
 
 2. Configure
 
-    npm install
+`npm install`
 
 3. Build & run
 
-    npm run build (or watch)
-    npm run start (or nodewatch)
+`npm run build (or watch)`
+`npm run start (or nodewatch)`
 
 4. Aim your DirectLine v3 client at this, e.g.
 
-    http://localhost:{your_favorite_port}?segment={test_case}
+`http://localhost:{your_favorite_port}?segment={test}/{area}`
 
-where `test_case` is one of the test cases currently listed in index.ts
+where `{test}/{area}` is one of the test cases currently listed in index.ts
 
 
