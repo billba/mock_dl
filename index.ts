@@ -16,11 +16,15 @@ app.use((req, res, next) => {
 
 const timeout = 60*1000;
 const conversationId = "mockversation";
-const token = "your_token_here";
 const expires_in = 1800;
 const streamUrl = "http://nostreamsupport";
 
-app.post('/:test/:area/tokens/generate', (req, res) => {
+const get_token = (req: express.Request) =>
+    (req.headers["authorization"] || "works/all").split(" ")[1];
+
+app.post('/mock/tokens/generate', (req, res) => {
+    const token = get_token(req);
+
     res.send({
         conversationId,
         token,
@@ -28,7 +32,9 @@ app.post('/:test/:area/tokens/generate', (req, res) => {
     });
 });
 
-app.post('/:test/:area/tokens/refresh', (req, res) => {
+app.post('/mock/tokens/refresh', (req, res) => {
+    const token = get_token(req);
+
     res.send({
         conversationId,
         token,
@@ -36,8 +42,10 @@ app.post('/:test/:area/tokens/refresh', (req, res) => {
     });
 });
 
-app.post('/:test/:area/conversations', (req, res) => {
-    if (req.params.test === 'timeout' && req.params.area === 'start') {
+app.post('/mock/conversations', (req, res) => {
+    const [test, area] = get_token(req).split("/");
+
+    if (test === 'timeout' && area === 'start') {
         setTimeout(() => startConversation(req, res), timeout);
         return;
     }
@@ -46,13 +54,16 @@ app.post('/:test/:area/conversations', (req, res) => {
 });
 
 const startConversation = (req: express.Request, res: express.Response) => {
+    const token = get_token(req);
+    const [test, area] = token.split("/");
+
     res.send({
         conversationId,
         token,
         expires_in,
         streamUrl
     });
-    sendMessage(res, `Welcome to MockBot! Here is test ${req.params.test} on area ${req.params.area}`);
+    sendMessage(res, `Welcome to MockBot! Here is test ${test} on area ${area}`);
 }
 
 interface Activity {
@@ -72,13 +83,16 @@ const sendMessage = (res: express.Response, text: string) => {
     })
 }
 
-app.post('/:test/:area/conversations/:conversationId/activities', (req, res) => {
-    if (req.params.test === 'expire' && req.params.area === 'post') {
+app.post('/mock/conversations/:conversationId/activities', (req, res) => {
+    const token = get_token(req);
+    const [test, area] = token.split("/");
+
+    if (test === 'expire' && area === 'post') {
         res.status(403).send({ error: { code: "TokenExpired" } });
         return;
     }
 
-    if (req.params.test === 'timeout' && req.params.area === 'post') {
+    if (test === 'timeout' && area === 'post') {
         setTimeout(() => postMessage(req, res), timeout);
         return;
     }
@@ -95,13 +109,16 @@ const postMessage = (req: express.Request, res: express.Response) => {
     sendMessage(res, `echo of post #${id}: ${req.body.text}`);
 }
 
-app.post('/:test/:area/conversations/:conversationId/upload', (req, res) => {
-    if (req.params.test === 'expire' && req.params.area === 'upload') {
+app.post('/mock/conversations/:conversationId/upload', (req, res) => {
+    const token = get_token(req);
+    const [test, area] = token.split("/");
+
+    if (test === 'expire' && area === 'upload') {
         res.status(403).send({ error: { code: "TokenExpired" } });
         return;
     }
 
-    if (req.params.test === 'timeout' && req.params.area === 'upload') {
+    if (test === 'timeout' && area === 'upload') {
         setTimeout(() => upload(req, res), timeout);
         return;
     }
@@ -116,13 +133,16 @@ const upload = (req: express.Request, res: express.Response) => {
     });
 }
 
-app.get('/:test/:area/conversations/:conversationId/activities', (req, res) => {
-    if (req.params.test === 'expire' && req.params.area === 'get') {
+app.get('/mock/conversations/:conversationId/activities', (req, res) => {
+    const token = get_token(req);
+    const [test, area] = token.split("/");
+
+    if (test === 'expire' && area === 'get') {
         res.status(403).send({ error: { code: "TokenExpired" } });
         return;
     }
 
-    if (req.params.test === 'timeout' && req.params.area === 'get') {
+    if (test === 'timeout' && area === 'get') {
         setTimeout(() => getMessages(req, res), timeout);
         return;
     }
@@ -151,11 +171,3 @@ const getMessages = (req: express.Request, res: express.Response) => {
 app.listen(process.env.port || process.env.PORT || 3000, () => {
     console.log('listening');
 });
-
-/* Here are the supported test cases:
-
-works/all: everything works perfectly. Enjoy.
-expire/[post|get|upload]: operation fails due to expired token
-timeout/[start|post|get|upload]: operation takes 60 seconds to respond 
-
-*/

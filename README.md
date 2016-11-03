@@ -4,23 +4,25 @@
 
 0. clone this repo
 
-1. Optionally, create a .env file containing defaults 
+### Optionally, create a .env file containing defaults 
 
 `PORT = your_favorite_port`
 
-2. Configure
+### Configure
 
 `npm install`
 
-3. Build & run
+### Build & run
 
 `npm run build (or watch)`
 `npm run start (or nodewatch)`
 
-4. Aim your DirectLine v3 client at this, e.g.
+### Aim your DirectLine v3 client at this, e.g.
 
-`http://localhost:{your_favorite_port}?segment={test}/{area}`
+`http://localhost:{your_favorite_port}?segment=mock`
 
-where `{test}/{area}` is one of the test cases currently listed in index.ts
+To choose the test case, pass "{test}/{area}" as your authorization token, as follows:
 
-
+* "works/all": (default) everything works perfectly. Enjoy.
+* "expire/[post|get|upload]": specified operation fails due to expired token
+* "timeout/[start|post|get|upload]": specified operation takes 60 seconds to respond 
