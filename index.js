@@ -16,6 +16,16 @@ const conversationId = "mockversation";
 const expires_in = 1800;
 const streamUrl = "http://nostreamsupport";
 const get_token = (req) => (req.headers["authorization"] || "works/all").split(" ")[1];
+const sendExpiredToken = (res) => {
+    res.status(403).send({ error: { code: "TokenExpired" } });
+};
+const sendStatus = (res, code) => {
+    const num = Number(code);
+    if (isNaN(num))
+        res.send(500).send("Mock Failed; unknown test");
+    else
+        res.status(num).send();
+};
 app.post('/mock/tokens/generate', (req, res) => {
     const token = get_token(req);
     res.send({
@@ -34,11 +44,18 @@ app.post('/mock/tokens/refresh', (req, res) => {
 });
 app.post('/mock/conversations', (req, res) => {
     const [test, area] = get_token(req).split("/");
-    if (test === 'timeout' && area === 'start') {
-        setTimeout(() => startConversation(req, res), timeout);
-        return;
-    }
-    startConversation(req, res);
+    if (test === 'works' || area !== 'start')
+        startConversation(req, res);
+    else
+        switch (test) {
+            case 'timeout':
+                setTimeout(() => startConversation(req, res), timeout);
+                return;
+            default:
+                // assume to be a status code
+                sendStatus(res, test);
+                return;
+        }
 });
 const startConversation = (req, res) => {
     const token = get_token(req);
@@ -62,15 +79,21 @@ const sendMessage = (res, text) => {
 app.post('/mock/conversations/:conversationId/activities', (req, res) => {
     const token = get_token(req);
     const [test, area] = token.split("/");
-    if (test === 'expire' && area === 'post') {
-        res.status(403).send({ error: { code: "TokenExpired" } });
-        return;
-    }
-    if (test === 'timeout' && area === 'post') {
-        setTimeout(() => postMessage(req, res), timeout);
-        return;
-    }
-    postMessage(req, res);
+    if (test === 'works' || area !== 'post')
+        postMessage(req, res);
+    else
+        switch (test) {
+            case 'timeout':
+                setTimeout(() => postMessage(req, res), timeout);
+                return;
+            case 'expire':
+                sendExpiredToken(res);
+                return;
+            default:
+                // assume to be a status code
+                sendStatus(res, test);
+                return;
+        }
 });
 const postMessage = (req, res) => {
     const id = messageId++;
@@ -82,15 +105,21 @@ const postMessage = (req, res) => {
 app.post('/mock/conversations/:conversationId/upload', (req, res) => {
     const token = get_token(req);
     const [test, area] = token.split("/");
-    if (test === 'expire' && area === 'upload') {
-        res.status(403).send({ error: { code: "TokenExpired" } });
-        return;
-    }
-    if (test === 'timeout' && area === 'upload') {
-        setTimeout(() => upload(req, res), timeout);
-        return;
-    }
-    upload(req, res);
+    if (test === 'works' || area !== 'upload')
+        upload(req, res);
+    else
+        switch (test) {
+            case 'timeout':
+                setTimeout(() => upload(req, res), timeout);
+                return;
+            case 'expire':
+                sendExpiredToken(res);
+                return;
+            default:
+                // assume to be a status code
+                sendStatus(res, test);
+                return;
+        }
 });
 const upload = (req, res) => {
     const id = messageId++;
@@ -101,15 +130,21 @@ const upload = (req, res) => {
 app.get('/mock/conversations/:conversationId/activities', (req, res) => {
     const token = get_token(req);
     const [test, area] = token.split("/");
-    if (test === 'expire' && area === 'get') {
-        res.status(403).send({ error: { code: "TokenExpired" } });
-        return;
-    }
-    if (test === 'timeout' && area === 'get') {
-        setTimeout(() => getMessages(req, res), timeout);
-        return;
-    }
-    getMessages(req, res);
+    if (test === 'works' || area !== 'get')
+        getMessages(req, res);
+    else
+        switch (test) {
+            case 'timeout':
+                setTimeout(() => getMessages(req, res), timeout);
+                return;
+            case 'expire':
+                sendExpiredToken(res);
+                return;
+            default:
+                // assume to be a status code
+                sendStatus(res, test);
+                return;
+        }
 });
 const getMessages = (req, res) => {
     if (queue.length > 0) {
