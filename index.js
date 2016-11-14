@@ -42,7 +42,13 @@ app.post('/mock/tokens/refresh', (req, res) => {
         expires_in
     });
 });
+let counter;
+let messageId;
+let queue;
 app.post('/mock/conversations', (req, res) => {
+    counter = 0;
+    queue = [];
+    messageId = 0;
     const [test, area] = get_token(req).split("/");
     if (test === 'works' || area !== 'start')
         startConversation(req, res);
@@ -68,8 +74,6 @@ const startConversation = (req, res) => {
     });
     sendMessage(res, `Welcome to MockBot! Here is test ${test} on area ${area}`);
 };
-let messageId = 0;
-const queue = [];
 const sendMessage = (res, text) => {
     queue.push({
         type: "message",
@@ -78,8 +82,8 @@ const sendMessage = (res, text) => {
 };
 app.post('/mock/conversations/:conversationId/activities', (req, res) => {
     const token = get_token(req);
-    const [test, area] = token.split("/");
-    if (test === 'works' || area !== 'post')
+    const [test, area, count] = token.split("/");
+    if (test === 'works' || area !== 'post' || !count || ++counter < Number(count))
         postMessage(req, res);
     else
         switch (test) {
@@ -104,8 +108,8 @@ const postMessage = (req, res) => {
 };
 app.post('/mock/conversations/:conversationId/upload', (req, res) => {
     const token = get_token(req);
-    const [test, area] = token.split("/");
-    if (test === 'works' || area !== 'upload')
+    const [test, area, count] = token.split("/");
+    if (test === 'works' || area !== 'upload' || !count || ++counter < Number(count))
         upload(req, res);
     else
         switch (test) {
@@ -129,8 +133,8 @@ const upload = (req, res) => {
 };
 app.get('/mock/conversations/:conversationId/activities', (req, res) => {
     const token = get_token(req);
-    const [test, area] = token.split("/");
-    if (test === 'works' || area !== 'get')
+    const [test, area, count] = token.split("/");
+    if (test === 'works' || area !== 'get' || !count || ++counter < Number(count))
         getMessages(req, res);
     else
         switch (test) {

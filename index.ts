@@ -54,7 +54,14 @@ app.post('/mock/tokens/refresh', (req, res) => {
     });
 });
 
+let counter: number;
+let messageId: number;
+let queue:Activity[];
+
 app.post('/mock/conversations', (req, res) => {
+    counter = 0;
+    queue = [];
+    messageId = 0;
     const [test, area] = get_token(req).split("/");
     if (test === 'works' || area !== 'start')
         startConversation(req, res);
@@ -89,9 +96,6 @@ interface Activity {
     from?: { id?: string, name?: string }
 }
 
-let messageId = 0;
-const queue:Activity[] = [];
-
 const sendMessage = (res: express.Response, text: string) => {
     queue.push({
         type: "message",
@@ -101,8 +105,8 @@ const sendMessage = (res: express.Response, text: string) => {
 
 app.post('/mock/conversations/:conversationId/activities', (req, res) => {
     const token = get_token(req);
-    const [test, area] = token.split("/");
-    if (test === 'works' || area !== 'post')
+    const [test, area, count] = token.split("/");
+    if (test === 'works' || area !== 'post' || !count || ++counter < Number(count))
         postMessage(req, res);
     else switch (test) {
         case 'timeout':
@@ -129,8 +133,8 @@ const postMessage = (req: express.Request, res: express.Response) => {
 
 app.post('/mock/conversations/:conversationId/upload', (req, res) => {
     const token = get_token(req);
-    const [test, area] = token.split("/");
-    if (test === 'works' || area !== 'upload')
+    const [test, area, count] = token.split("/");
+    if (test === 'works' || area !== 'upload' || !count || ++counter < Number(count))
         upload(req, res);
     else switch (test) {
         case 'timeout':
@@ -155,8 +159,8 @@ const upload = (req: express.Request, res: express.Response) => {
 
 app.get('/mock/conversations/:conversationId/activities', (req, res) => {
     const token = get_token(req);
-    const [test, area] = token.split("/");
-    if (test === 'works' || area !== 'get')
+    const [test, area, count] = token.split("/");
+    if (test === 'works' || area !== 'get' || !count || ++counter < Number(count))
         getMessages(req, res);
     else switch (test) {
         case 'timeout':

@@ -19,11 +19,13 @@
 
 ### Aim your DirectLine v3 client at this. For WebChat, try
 
-`http://localhost:{your_webchat_port}?s={test}/{area}&domain=http//localhost:{your_mock_dl_port}/mock`
+`http://localhost:{your_webchat_port}?s={test}/{area}[/{count}]&domain=http//localhost:{your_mock_dl_port}/mock`
 
-To choose the test case, pass "{test}/{area}" as your Direct Line secret, as follows:
+To choose the test case, pass "{test}/{area}[/{count}]" as your Direct Line secret, as follows:
 
 * "works/all": (default) everything works perfectly. Enjoy.
 * "expire/{post|get|upload}": specified operation fails due to expired token
 * "timeout/{start|post|get|upload}": specified operation takes 60 seconds to respond 
 * "{status code}/{start|post|get|upload}"; specified operation fails due to specific status code
+
+For post, get, and upload you may specify an optional count parameter, in which case the specified operation will succeed until the specific count.
